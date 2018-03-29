@@ -2,7 +2,7 @@
 # @Author: Kivin1
 # @Date:   2018-02-13 16:48:34
 # @Last Modified by:   Kivin1
-# @Last Modified time: 2018-03-27 22:57:14
+# @Last Modified time: 2018-03-29 10:20:24
 import flask
 import time
 from flask import render_template,request,redirect,url_for,flash
@@ -23,10 +23,10 @@ app = flask.Flask(__name__)
 app.secret_key = os.urandom(24)
 login_manager = LoginManager(app)
 mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'ktph'
-app.config['MYSQL_DATABASE_DB'] = 'ktph' 
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = 'ktph_admin'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'ktph_admin'
+app.config['MYSQL_DATABASE_DB'] = 'KTPH' 
+app.config['MYSQL_DATABASE_HOST'] = 'ktphdatabase.ct4c3hj4sn6o.ap-southeast-1.rds.amazonaws.com'
 mysql.init_app(app)
 
 conn = mysql.connect()
@@ -48,9 +48,9 @@ month = time.strftime("%b")
 # li_select2 = [month]
 # li_select3 = [month]
 
-ip_tables = ["ktphip_1117data","ktphip_1217data","ktphip_0118data",]
-op_tables = ["ktphop_1117data","ktphop_1217data","ktphop_0118data",]
 
+ip_tables = ["KTPHIP_1117DATA","KTPHIP_1217DATA","KTPHIP_0118DATA",]
+op_tables = ["KTPHOP_1117DATA","KTPHOP_1217DATA","KTPHOP_0118DATA",]
 legend1 = 'Top-box'
 legend2 = 'Middle-box'
 legend3 = 'Bottom-box'
@@ -58,7 +58,7 @@ legend3 = 'Bottom-box'
 
 
 def query_user(username):
-    sql = "SELECT * FROM inpatient.User;"
+    sql = "SELECT * FROM KTPH.User;"
     cursor.execute(sql)
     for i in cursor:
         print("i",i)
@@ -84,7 +84,7 @@ def login():
         user_name = request.form.get('username', None)
         password = request.form.get('password', None)
         remember_me = request.form.get('remember_me', False)
-        sql = "SELECT * FROM inpatient.User;"
+        sql = "SELECT * FROM KTPH.User;"
         cursor.execute(sql)
         for i in cursor:
             # user = User(i[0],i[1])
@@ -110,11 +110,11 @@ def getLabelsDepartments():
     for i in ip_tables:
         labels.append(month[int(i[-8:-6])-1]+" "+i[-6:-4])
 
-        department = getDepartments("select distinct Ward from ktph."+i)
+        department = getDepartments("select distinct Ward from KTPH."+i)
         in_departments.append(set(department))
 
     for i in op_tables:
-        department = getDepartments("select distinct Clinic from ktph."+i)
+        department = getDepartments("select distinct Clinic from KTPH."+i)
         out_departments.append(set(department))
 
     in_s = in_departments[0]
@@ -145,7 +145,7 @@ def render_index():
 
     for i in ip_tables:
         
-        OverallExperience = getRatings("select A1 from ktph."+i)
+        OverallExperience = getRatings("select A1 from KTPH."+i)
         
         top_box,middle_box,bottom_box = trans_scale(OverallExperience)
         intop_boxs.append(top_box)
@@ -153,7 +153,7 @@ def render_index():
         inbottom_boxs.append(bottom_box)
 
     for i in op_tables:
-        OverallExperience = getRatings("select A1 from ktph."+i)    
+        OverallExperience = getRatings("select A1 from KTPH."+i)    
        
         
         top_box,middle_box,bottom_box = trans_scale(OverallExperience)
@@ -205,14 +205,14 @@ def render_index():
             print("select",select)
             for i in ip_tables:
                 if select == i[-8:-6]:
-                    ip_OverallExperience = getRatings("select A1 from ktph."+i)
+                    ip_OverallExperience = getRatings("select A1 from KTPH."+i)
                     ip_top_box,ip_middle_box,ip_bottom_box = trans_scale(ip_OverallExperience)
                     return_select = select1+" "+i[-6:-4]
                     
 
             for i in op_tables:
                 if select == i[-8:-6]:
-                    op_OverallExperience = getRatings("select A1 from ktph."+i)
+                    op_OverallExperience = getRatings("select A1 from KTPH."+i)
                     op_top_box,op_middle_box,op_bottom_box = trans_scale(op_OverallExperience)
             
             data = {
@@ -402,19 +402,19 @@ def getDepartments(sql):
 
 
 
-def render_month_department():
-    # month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    sql = "SELECT DISTINCT month_id,department_month_ratings.﻿Month FROM inpatient.department_month_ratings order by month_id"
-    cursor.execute(sql)
-    mons = []
-    for i in cursor:
-        mons.append(i[1])
-    departments = []
-    sql = "SELECT DISTINCT Department FROM inpatient.department_month_ratings;"
-    cursor.execute(sql)
-    for i in cursor:
-        departments.append(i[0])
-    return mons,departments
+# def render_month_department():
+#     # month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun","Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+#     sql = "SELECT DISTINCT month_id,department_month_ratings.﻿Month FROM inpatient.department_month_ratings order by month_id"
+#     cursor.execute(sql)
+#     mons = []
+#     for i in cursor:
+#         mons.append(i[1])
+#     departments = []
+#     sql = "SELECT DISTINCT Department FROM inpatient.department_month_ratings;"
+#     cursor.execute(sql)
+#     for i in cursor:
+#         departments.append(i[0])
+#     return mons,departments
 
 
 def convertstr_float(str):
@@ -444,7 +444,7 @@ def getCollectedFeedback():
         sum+=ipresults[0][0]+opresults[0][0]
     for i in feedback:
         feedback_ratio.append([convertfloat_str(i[0]/sum),convertfloat_str(i[1]/sum)])
-    
+    print("feedback........",feedback)
     return feedback,feedback_ratio
 
 

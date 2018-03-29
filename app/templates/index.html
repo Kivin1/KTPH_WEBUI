@@ -578,7 +578,7 @@ var opt = {
     scales: {
     yAxes: [{
             ticks: {
-              beginAtZero: true,
+              min:0,
               steps: 10,
               stepValue: 0.1,
               max: 1
@@ -720,7 +720,7 @@ var opt = {
     scales: {
     yAxes: [{
             ticks: {
-              beginAtZero: true,
+              min:0,
               steps: 10,
               stepValue: 0.1,
               max: 1
@@ -1086,13 +1086,21 @@ var opt = {
                     display:false
                 },
                 
+                
             }],
     yAxes: [{
                 gridLines: {
                     display:false
                 },
                 ticks: {
-                  fontColor: "#404040", // this here
+                  fontColor: "#404040",
+
+                 min:300,
+                 steps: 8,
+                 stepValue: 20,
+                 max: 440
+
+               
                 },   
             }]
     },
@@ -1120,7 +1128,7 @@ var opt = {
 };
  var ctx = document.getElementById("canvas"),
      myLineChart = new Chart(ctx, {
-        type: 'horizontalBar',
+        type: 'bar',
         data: chartData,
         options: opt,
 
